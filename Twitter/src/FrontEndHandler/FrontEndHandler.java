@@ -2,6 +2,8 @@ package FrontEndHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -51,10 +53,6 @@ public class FrontEndHandler extends HttpServlet{
 	}
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException{
-//		PrintWriter out = response.getWriter();
-//		out.println("lmao, " + "0992-3171-4790");
-//		Date date = new Date();
-//		out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
 		try {
 			try {
 				performTheAction(request, response);
@@ -95,10 +93,22 @@ public class FrontEndHandler extends HttpServlet{
 			String userId = request.getParameter("userid");
 			String tweet_time = request.getParameter("tweet_time");
 			TweetDAO tweetDAO = Model.getTweetDAO();
-			System.out.println(userId + " " + tweet_time);
-			TweetBean tweet = tweetDAO.getTweet(Integer.parseInt(userId), tweet_time);
-			System.out.println(tweet);
-			out.println(tweet.getText());
+			//System.out.println(userId + " " + tweet_time);
+			TweetBean[] tweet = tweetDAO.getTweet(Long.parseLong(userId), tweet_time);
+			//System.out.println(tweet);
+			Arrays.sort(tweet, new Comparator<TweetBean>() {
+				@Override
+				public int compare(TweetBean arg0, TweetBean arg1) {
+					// TODO Auto-generated method stub
+					if (arg0.getTweetId() < arg1.getTweetId()) return -1;
+					else if (arg0.getTweetId() == arg1.getTweetId()) return 0;
+					else return 1;
+				}	
+			});
+			out.println("lmao, " + "0992-3171-4790");
+			for (int i = 0; i < tweet.length; i++) {
+				out.println(tweet[i].getTweetId());
+			}
 		}
 
 		//return Action.perform(action, request);

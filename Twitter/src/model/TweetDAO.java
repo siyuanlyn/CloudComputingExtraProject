@@ -95,34 +95,33 @@ public class TweetDAO {
         }
 	}
 
-	public TweetBean getTweet(int userId, String createdAt) throws MyDAOException {
+	public TweetBean[] getTweet(long l, String createdAt) throws MyDAOException {
 		Connection con = null;
         try {
         	con = getConnection();
 
-        	PreparedStatement pstmt = con.prepareStatement("SELECT * FROM " + tableName + " WHERE userId=? AND createdAt=?"
-        			+ " ON DUPLICATE KEY UPDATE userId = userId");
-        	pstmt.setInt(1,userId);
+        	PreparedStatement pstmt = con.prepareStatement("SELECT * FROM " + tableName + " WHERE userId=? AND createdAt=?");
+        	pstmt.setLong(1,l);
         	pstmt.setString(2,createdAt);
         	
         	ResultSet rs = pstmt.executeQuery();
         	
-        	TweetBean tweetBean;
-        	if (!rs.next()) {
-        		tweetBean = null;
-        	} else {
-        		tweetBean = new TweetBean();
+        	List<TweetBean> list = new ArrayList<TweetBean>();
+            while (rs.next()) {
+            	TweetBean tweetBean = new TweetBean();
+            	tweetBean.setTweetId(rs.getLong("tweetId"));
         		tweetBean.setCreatedAt(rs.getString("createdAt"));
         		tweetBean.setPlaceId(rs.getString("placeId"));
         		tweetBean.setRetweetedStatus(rs.getLong("retweeted_status"));
         		tweetBean.setText(rs.getString("text"));
-        		tweetBean.setUserId(rs.getInt("userId"));
-        	}
+        		tweetBean.setUserId(rs.getLong("userId"));
+            	list.add(tweetBean);
+            }
         	
         	rs.close();
         	pstmt.close();
         	releaseConnection(con);
-            return tweetBean;
+            return list.toArray(new TweetBean[list.size()]);
             
         } catch (Exception e) {
             try { if (con != null) con.close(); } catch (SQLException e2) { /* ignore */ }
