@@ -15,18 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.genericdao.ConnectionPool;
-import org.genericdao.DAOException;
-import org.genericdao.GenericDAO;
-import org.genericdao.MatchArg;
-import org.genericdao.RollbackException;
-import org.genericdao.Transaction;
 
 import databeans.TweetBean;
 
@@ -80,9 +69,9 @@ public class TweetDAO {
         	pstmt.setLong(1, tweet.getTweetId());
         	pstmt.setString(2,tweet.getCreatedAt());
         	pstmt.setLong(3,tweet.getRetweetedStatus());
-        	pstmt.setString(4,tweet.getText());
+        	//pstmt.setString(4,tweet.getText());
         	pstmt.setLong(5,tweet.getUserId());
-        	pstmt.setString(6,tweet.getPlaceId());
+        	//pstmt.setString(6,tweet.getPlaceId());
         	int count = pstmt.executeUpdate();
         	if (count != 1) throw new SQLException("Insert updated "+count+" rows");
         	
@@ -111,9 +100,43 @@ public class TweetDAO {
             	TweetBean tweetBean = new TweetBean();
             	tweetBean.setTweetId(rs.getLong("tweetId"));
         		tweetBean.setCreatedAt(rs.getString("createdAt"));
-        		tweetBean.setPlaceId(rs.getString("placeId"));
+        		//tweetBean.setPlaceId(rs.getString("placeId"));
         		tweetBean.setRetweetedStatus(rs.getLong("retweeted_status"));
-        		tweetBean.setText(rs.getString("text"));
+        		//tweetBean.setText(rs.getString("text"));
+        		tweetBean.setUserId(rs.getLong("userId"));
+            	list.add(tweetBean);
+            }
+        	
+        	rs.close();
+        	pstmt.close();
+        	releaseConnection(con);
+            return list.toArray(new TweetBean[list.size()]);
+            
+        } catch (Exception e) {
+            try { if (con != null) con.close(); } catch (SQLException e2) { /* ignore */ }
+        	throw new MyDAOException(e);
+        }
+	}
+	
+	public TweetBean[] getTweetByUid(String userId) throws MyDAOException {
+		long uid = Long.parseLong(userId);
+		Connection con = null;
+        try {
+        	con = getConnection();
+
+        	PreparedStatement pstmt = con.prepareStatement("SELECT * FROM " + tableName + " WHERE userId=?");
+        	pstmt.setLong(1,uid);
+        	
+        	ResultSet rs = pstmt.executeQuery();
+        	
+        	List<TweetBean> list = new ArrayList<TweetBean>();
+            while (rs.next()) {
+            	TweetBean tweetBean = new TweetBean();
+            	tweetBean.setTweetId(rs.getLong("tweetId"));
+        		tweetBean.setCreatedAt(rs.getString("createdAt"));
+        		//tweetBean.setPlaceId(rs.getString("placeId"));
+        		tweetBean.setRetweetedStatus(rs.getLong("retweeted_status"));
+        		//tweetBean.setText(rs.getString("text"));
         		tweetBean.setUserId(rs.getLong("userId"));
             	list.add(tweetBean);
             }
@@ -141,9 +164,9 @@ public class TweetDAO {
             while (rs.next()) {
             	TweetBean tweetBean = new TweetBean();
         		tweetBean.setCreatedAt(rs.getString("createdAt"));
-        		tweetBean.setPlaceId(rs.getString("placeId"));
+        		//tweetBean.setPlaceId(rs.getString("placeId"));
         		tweetBean.setRetweetedStatus(rs.getLong("retweeted_status"));
-        		tweetBean.setText(rs.getString("text"));
+        		//tweetBean.setText(rs.getString("text"));
         		tweetBean.setUserId(rs.getInt("userId"));
             	list.add(tweetBean);
             }
@@ -151,6 +174,30 @@ public class TweetDAO {
             releaseConnection(con);
             
             return list.toArray(new TweetBean[list.size()]);
+    	} catch (SQLException e) {
+            try { if (con != null) con.close(); } catch (SQLException e2) { /* ignore */ }
+        	throw new MyDAOException(e);
+		}
+	}
+	
+	public ArrayList<Long> getUidByRetweetId(long retweet_id) throws MyDAOException {
+		Connection con = null;
+    	try {
+        	con = getConnection();
+
+            Statement stmt = con.createStatement();
+            PreparedStatement pstmt = con.prepareStatement("SELECT userId FROM " + tableName + " where retweeted_status=?");
+            pstmt.setLong(1,retweet_id);
+            ResultSet rs = pstmt.executeQuery();
+            
+            List<Long> list = new ArrayList<Long>();
+            while (rs.next()) {
+        		list.add(rs.getLong("userId"));
+            }
+            stmt.close();
+            releaseConnection(con);
+            
+            return (ArrayList<Long>) list;
     	} catch (SQLException e) {
             try { if (con != null) con.close(); } catch (SQLException e2) { /* ignore */ }
         	throw new MyDAOException(e);
@@ -233,12 +280,13 @@ public class TweetDAO {
             		"(tweetId BIGINT," +
             		"createdAt VARCHAR(50)," +
             		"retweeted_status BIGINT," +
-            		"text VARCHAR(255)," +
-            		"userId BIGINT," +
-            		"placeId VARCHAR(255) NULL," +
-            		"PRIMARY KEY(tweetId)," +
-            		"FOREIGN KEY(placeId) REFERENCES place(placeId) ON DELETE SET NULL," +
-            		"FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE)");
+            		//"text VARCHAR(255)," +
+            		"userId BIGINT)" //+
+            		//"placeId VARCHAR(255) NULL," +
+            		//"PRIMARY KEY(tweetId)," +
+            		//"FOREIGN KEY(placeId) REFERENCES place(placeId) ON DELETE SET NULL," +
+            		//"FOREIGN KEY(userId) REFERENCES user(userId) ON DELETE CASCADE)");
+            		);
             stmt.close();
             releaseConnection(con);
         } catch (SQLException e) {

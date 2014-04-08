@@ -2,9 +2,12 @@ package FrontEndHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,6 +21,7 @@ import model.Model;
 import model.MyDAOException;
 import model.TweetDAO;
 import databeans.TweetBean;
+import databeans.User;
 
 
 public class FrontEndHandler extends HttpServlet{
@@ -88,7 +92,7 @@ public class FrontEndHandler extends HttpServlet{
 			out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
 		}
 
-		if (action.equals("q2")){
+		else if (action.equals("q2")){
 			//return Action.perform("list.do", request);
 			String userId = request.getParameter("userid");
 			String tweet_time = request.getParameter("tweet_time");
@@ -108,6 +112,21 @@ public class FrontEndHandler extends HttpServlet{
 			out.println("lmao, " + "0992-3171-4790");
 			for (int i = 0; i < tweet.length; i++) {
 				out.println(tweet[i].getTweetId());
+			}
+		}
+		
+		else if (action.equals("q3")) {
+			String userId = request.getParameter("userid");
+			TweetDAO tweetDAO = Model.getTweetDAO();
+			TweetBean[] tweets = tweetDAO.getTweetByUid(userId);
+			ArrayList<Long> userIds = new ArrayList<Long>();
+			for (TweetBean bean : tweets) {
+				userIds.addAll(tweetDAO.getUidByRetweetId(bean.getTweetId()));
+			}
+			Collections.sort(userIds);
+			out.println("lmao, " + "0992-3171-4790");
+			for (Long uid : userIds) {
+				out.println(uid);
 			}
 		}
 

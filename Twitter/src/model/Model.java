@@ -1,25 +1,13 @@
-/*
- * Title: Homework #9
- * Name: Danni Wu
- * Andrew ID: danniw
- * Course Number: 08600
- * Date: 11/28/2013
- */
-package model;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+package model;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.genericdao.ConnectionPool;
-import org.genericdao.DAOException;
-import org.genericdao.RollbackException;
-
 import databeans.TweetBean;
 import databeans.User;
-import etl.mysqlETL;
+import etl.gsonETL;
 
 
 public class Model {
@@ -43,8 +31,8 @@ public class Model {
 			String jdbcURL = config.getInitParameter("jdbcURL");
 
 			ConnectionPool pool = new ConnectionPool(jdbcDriver, jdbcURL);
-			userDAO = new UserDAO(jdbcDriver, jdbcURL, "user");// new UserDAO(pool, "user");
-			placeDAO = new PlaceDAO(jdbcDriver, jdbcURL, "place");
+//			userDAO = new UserDAO(jdbcDriver, jdbcURL, "user");// new UserDAO(pool, "user");
+//			placeDAO = new PlaceDAO(jdbcDriver, jdbcURL, "place");
 			tweetDAO = new TweetDAO(jdbcDriver, jdbcURL, "tweet_createdByIn"); //new TweetDAO(pool, "tweet_createdByIn");
 			
 
@@ -81,9 +69,11 @@ public class Model {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+//			gsonETL etl = new gsonETL();
+//			etl.parse();
 	}
 
 	public static TweetDAO getTweetDAO() { return tweetDAO; }
-	public static UserDAO getUserDAO() { return userDAO; }
-	public static PlaceDAO getPlaceDAO() { return placeDAO; }
+//	public static UserDAO getUserDAO() { return userDAO; }
+//	public static PlaceDAO getPlaceDAO() { return placeDAO; }
 }

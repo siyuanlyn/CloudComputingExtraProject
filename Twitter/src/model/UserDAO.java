@@ -128,7 +128,7 @@ public class UserDAO {
         	con = getConnection();
 
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName + " WHERE =?");
             
             List<User> list = new ArrayList<User>();
             while (rs.next()) {
@@ -146,6 +146,7 @@ public class UserDAO {
         	throw new MyDAOException(e);
 		}
 	}
+	
 	
 	private boolean tableExists() throws MyDAOException {
 		Connection con = null;
